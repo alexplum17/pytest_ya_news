@@ -1,6 +1,7 @@
 import pytest
 from django.test.client import Client
-from news.models import News
+
+from news.models import Comment, News
 
 
 @pytest.fixture
@@ -28,14 +29,21 @@ def not_author_client(not_author):
 
 
 @pytest.fixture
-def news(author):
+def news():
     news = News.objects.create(
         title='Заголовок',
-        text='Текст заметки',
-        pk='1',
-        author=author,
+        text='Текст новости',
     )
     return news
+
+@pytest.fixture
+def comment(author, news):
+    comment = Comment.objects.create(
+        news=news,
+        text='Текст комментария',
+        author=author
+    )
+    return comment
 
 
 @pytest.fixture
@@ -48,5 +56,4 @@ def form_data():
     return {
         'title': 'Новый заголовок',
         'text': 'Новый текст',
-        'pk': '11'
     }
