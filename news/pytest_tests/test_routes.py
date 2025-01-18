@@ -19,8 +19,12 @@ def test_post_availability_for_anonymous_user(client, news):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_comment_edit_and_delete_only_for_author(author_client, comment):
-    url = reverse('news:delete', args=[comment.pk])
+@pytest.mark.parametrize(
+    'name',
+    ('news:delete', 'news:edit')
+)
+def test_comment_edit_and_delete_only_for_author(author_client, comment, name):
+    url = reverse(name, args=[comment.pk])
     response = author_client.get(url)
     assert response.status_code == HTTPStatus.OK
 
@@ -41,7 +45,9 @@ def test_comment_edit_and_delete_for_anonymous_user(client, comment, name):
     'name',
     ('news:delete', 'news:edit')
 )
-def test_comment_edit_and_delete_not_for_author(not_author_client, comment, name):
+def test_comment_edit_and_delete_not_for_author(not_author_client,
+                                                comment,
+                                                name):
     url = reverse(name, args=[comment.pk])
     response = not_author_client.get(url)
     assert response.status_code == HTTPStatus.NOT_FOUND

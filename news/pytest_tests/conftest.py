@@ -54,6 +54,5 @@ def pk_for_args(news):
 @pytest.fixture
 def form_data():
     return {
-        'title': 'Новый заголовок',
-        'text': 'Новый текст',
+        'text': 'Текст',
     }
