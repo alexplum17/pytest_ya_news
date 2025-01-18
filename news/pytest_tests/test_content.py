@@ -23,8 +23,8 @@ def test_news_sorted_by_creation_date(client, news):
     """
     Проверяет, что новости сортируются по дате создания.
 
-    Создает новую новость и запрашивает главную страницу. 
-    Ожидается, что самая первая новость в контексте - это 
+    Создает новую новость и запрашивает главную страницу.
+    Ожидается, что самая первая новость в контексте - это
     старая новость, а вторая - новая.
     """
     news
@@ -44,7 +44,8 @@ def test_comments_sorted_by_creation_date(author_client, comment):
     comment
     Comment.objects.create(news=comment.news, text='Текст нового комментария',
                            author=comment.author)
-    response = author_client.get(reverse('news:detail', args=(comment.news.pk,)))
+    response = author_client.get(reverse('news:detail',
+                                         args=(comment.news.pk,)))
     comments = response.context['object'].comment_set.all()
     assert comments[0].text == 'Текст комментария'
     assert comments[1].text == 'Текст нового комментария'
@@ -54,7 +55,7 @@ def test_anonymous_user_not_see_comment_form(client, news):
     """
     Проверяет, что анонимные пользователи не видят форму комментария.
 
-    Запрашивает страницу с новостью и проверяет, что форма 
+    Запрашивает страницу с новостью и проверяет, что форма
     не присутствует в контексте.
     """
     response = client.get(reverse('news:detail', args=(news.pk,)))

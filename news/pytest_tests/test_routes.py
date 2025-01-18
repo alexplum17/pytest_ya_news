@@ -35,9 +35,11 @@ def test_post_availability_for_anonymous_user(client, news):
 )
 def test_comment_edit_and_delete_only_for_author(author_client, comment, name):
     """
-    Проверяет, что только автор комментария может его редактировать или удалять.
-    
-    Ожидается, что статус-код ответа будет 200 (OK) для авторизованного автора.
+    Проверяет, что только автор комментария может
+    его редактировать или удалять.
+
+    Ожидается, что статус-код ответа будет
+    200 (OK) для авторизованного автора.
     """
     url = reverse(name, args=[comment.pk])
     response = author_client.get(url)
@@ -50,9 +52,11 @@ def test_comment_edit_and_delete_only_for_author(author_client, comment, name):
 )
 def test_comment_edit_and_delete_for_anonymous_user(client, comment, name):
     """
-    Проверяет, что анонимные пользователи не могут редактировать или удалять комментарии.
-    
-    Ожидается перенаправление анонимного пользователя на страницу входа при попытке
+    Проверяет, что анонимные пользователи не могут
+    редактировать или удалять комментарии.
+
+    Ожидается перенаправление анонимного пользователя
+    на страницу входа при попытке
     доступа к редактированию или удалению комментария.
     """
     login_url = reverse('users:login')
@@ -66,9 +70,10 @@ def test_comment_edit_and_delete_for_anonymous_user(client, comment, name):
     'name',
     ('news:delete', 'news:edit')
 )
-def test_comment_edit_and_delete_not_for_author(not_author_client, comment, name):
+def test_comment_edit_and_delete_not_for_author(not_author_client,
+                                                comment, name):
     """
-    Проверяет, что пользователи, не являющиеся авторами комментария, 
+    Проверяет, что пользователи, не являющиеся авторами комментария,
     не могут его редактировать или удалять.
     
     Ожидается, что статус-код ответа будет 404 (Not Found).
@@ -84,8 +89,9 @@ def test_comment_edit_and_delete_not_for_author(not_author_client, comment, name
 )
 def test_pages_availability_for_anonymous_user(client, name):
     """
-    Проверяет доступность страниц входа, выхода и регистрации для анонимных пользователей.
-    
+    Проверяет доступность страниц входа, выхода
+    и регистрации для анонимных пользователей.
+
     Ожидается, что статус-код ответа будет 200 (OK).
     """
     url = reverse(name)

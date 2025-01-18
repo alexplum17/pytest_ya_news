@@ -84,7 +84,7 @@ def pk_for_args(news):
 
     Возвращает кортеж с первичным ключом объекта news.
     """
-    return (news.pk,)
+    return (news.pk)
 
 
 @pytest.fixture
