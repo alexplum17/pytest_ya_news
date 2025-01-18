@@ -21,7 +21,7 @@ def test_news_sorted_by_creation_date(client, news):
     assert response.context['news_feed'][1].title == 'Новый заголовок'
 
 
-def test_comments_sorted_chronologically(author_client, comment):
+def test_comments_sorted_by_creation_date(author_client, comment):
     comment
     Comment.objects.create(news=comment.news, text='Текст нового комментария',
                            author=comment.author)
