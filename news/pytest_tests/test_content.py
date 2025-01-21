@@ -1,54 +1,56 @@
+from datetime import timedelta
+
 import pytest
 from django.urls import reverse
 
-from news.models import Comment, News
+from news.forms import CommentForm
 
 pytestmark = pytest.mark.django_db
 
 
+@pytest.mark.usefixtures('multiple_news')
 def test_news_count_on_home_page(author_client):
     """
     Проверяет, что на главной странице количество новостей не превышает 10.
-
-    Создает 12 новостей и затем запрашивает главную страницу. 
+    Создает 12 новостей и затем запрашивает главную страницу.
     Ожидается, что количество новостей в контексте не превысит 10.
     """
-    for i in range(12):
-        News.objects.create(title=f'Заголовок {i}', text=f'Текст новости {i}')
     response = author_client.get(reverse('news:home'))
-    assert len(response.context['news_feed']) <= 10
+    assert response.context['object_list'].count() <= 10
 
-
-def test_news_sorted_by_creation_date(client, news):
+@pytest.mark.usefixtures('random_news')
+def test_news_sorted_by_creation_date(client):
     """
     Проверяет, что новости сортируются по дате создания.
-
-    Создает новую новость и запрашивает главную страницу.
-    Ожидается, что самая первая новость в контексте - это
-    старая новость, а вторая - новая.
+    Ожидается, что самая старая новость в контексте - это
+    последняя новость в списке новостей, а самая новая -
+    первая в списке новостей.
     """
-    news
-    News.objects.create(title='Новый заголовок', text='Текст свежей новости')
     response = client.get(reverse('news:home'))
-    assert response.context['news_feed'][0].title == 'Заголовок'
-    assert response.context['news_feed'][1].title == 'Новый заголовок'
+    news_list = list(response.context['object_list'])
+    assert news_list[0].date > news_list[1].date
+    for i in range(1, len(news_list) - 1):
+        assert news_list[i].date > news_list[i + 1].date
+    assert news_list[-1].date < news_list[0].date
 
 
-def test_comments_sorted_by_creation_date(author_client, comment):
+@pytest.mark.usefixtures('random_comments')
+def test_comments_sorted_by_creation_date(author_client, multiple_comments):
     """
     Проверяет, что комментарии сортируются по дате создания.
-
-    Создает новый комментарий и запрашивает страницу с новостью. 
+    Ожидается, что самый старый комментарий в контексте - это
+    первый комментарий в списке комментариев, а самый новый -
+    последний в списке комментарией.
+    Создает новый комментарий и запрашивает страницу с новостью.
     Ожидается, что комментарии будут возвращены в правильном порядке.
     """
-    comment
-    Comment.objects.create(news=comment.news, text='Текст нового комментария',
-                           author=comment.author)
     response = author_client.get(reverse('news:detail',
-                                         args=(comment.news.pk,)))
-    comments = response.context['object'].comment_set.all()
-    assert comments[0].text == 'Текст комментария'
-    assert comments[1].text == 'Текст нового комментария'
+                                         args=(multiple_comments[0].news.pk,)))
+    comment_list = list(response.context['object'].comment_set.all())
+    assert comment_list[0].created < comment_list[1].created
+    for i in range(1, len(comment_list) - 1):
+        assert comment_list[i].created < comment_list[i + 1].created
+    assert comment_list[-1].created > comment_list[0].created
 
 
 def test_anonymous_user_not_see_comment_form(client, news):
@@ -66,8 +68,9 @@ def test_authorized_user_can_see_comment_form(not_author_client, news):
     """
     Проверяет, что авторизованные пользователи видят форму комментария.
 
-    Запрашивает страницу с новостью и проверяет, что форма 
+    Запрашивает страницу с новостью и проверяет, что форма
     присутствует в контексте.
     """
     response = not_author_client.get(reverse('news:detail', args=(news.pk,)))
     assert 'form' in response.context
+    assert isinstance(response.context['form'], CommentForm)
